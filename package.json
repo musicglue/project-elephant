@@ -1,0 +1,35 @@
+{
+  "name": "elephant",
+  "version": "1.0.0",
+  "description": "A minimal model layer for pg-promises",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha --recursive --compilers js:babel-core/register"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/musicglue/elephant.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/musicglue/elephant/issues"
+  },
+  "homepage": "https://github.com/musicglue/elephant#readme",
+  "dependencies": {
+    "pg-promise": "^3.3.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.6.5",
+    "babel-core": "^6.7.2",
+    "babel-eslint": "^5.0.0",
+    "babel-plugin-syntax-flow": "^6.5.0",
+    "babel-plugin-transform-flow-strip-types": "^6.7.0",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.2.0",
+    "eslint": "~2.2.0",
+    "eslint-config-airbnb": "^6.1.0",
+    "flow-bin": "^0.22.1",
+    "mocha": "^2.4.5"
+  }
+}
