@@ -1,9 +1,10 @@
 {
   "name": "elephant",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "A minimal model layer for pg-promises",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "scripts": {
+    "build": "babel src --out-dir lib",
     "test": "NODE_ENV=test mocha --recursive --compilers js:babel-core/register"
   },
   "repository": {
@@ -20,11 +21,12 @@
     "pg-promise": "^3.3.0"
   },
   "devDependencies": {
+    "@somehats/babel-preset-node5": "^10.9.0",
     "babel-cli": "^6.6.5",
     "babel-core": "^6.7.2",
     "babel-eslint": "^5.0.0",
     "babel-plugin-syntax-flow": "^6.5.0",
-    "babel-plugin-transform-flow-strip-types": "^6.7.0",
+    "babel-plugin-transform-flow-comments": "^6.7.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.2.0",
     "eslint": "~2.2.0",

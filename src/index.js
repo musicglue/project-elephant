@@ -1,24 +1,42 @@
-/* @flow */
+// @flow
 
-import type { QueryOptions } from './types';
+import {
+  camelCase,
+  mapKeys,
+} from 'lodash';
 
-const defaultFormatter = (row: any): any => row
+import pgp, {
+  txMode,
+} from 'pg-promise';
 
-type PgTx = {};
-type TxFn<R> = (tx: PgTx) => Promise<R>;
-type TxOpts = { isolation?: string };
+import type {
+  Bindings,
+  PG,
+  TxFn,
+  TxOpts,
+  Row,
+  QueryOptions,
+  QueryFile,
+} from './types';
 
 export default class Elephant<T> {
-  db: any;
+  db: PG;
 
-  constructor(db: any) {
+  static queryFile(file: string): QueryFile {
+    return new pgp.QueryFile(file, { minify: true, debug: true });
+  }
+
+  constructor(db: PG) {
     this.db = db;
   }
 
   _transaction<R>(fn: TxFn<R>, options: TxOpts = {}) : Promise<R> {
-    const mode = new TransactionMode({});
-    fn.mode = mode;
-    return this.db.transaction(fn);
+    const mode = new txMode.TransactionMode({
+      isolation: txMode.isolationLevel[options.isolation],
+    });
+    const executor = tx => fn(tx);
+    executor.mode = mode;
+    return this.db.tx(executor);
   }
 
   transaction<R>(opts: TxFn<R> | TxOpts, fn?: TxFn<R>) : Promise<R> {
@@ -26,27 +44,25 @@ export default class Elephant<T> {
       return this._transaction(opts);
     } else if (typeof opts === 'object' && typeof fn === 'function') {
       return this._transaction(fn);
-    } else {
-      throw new Error('errrhhmahhgerrrddddd it went wrong');
     }
+    throw new TypeError('transaction must be passed an executor function');
   }
 
-  format(row: Object) : T {
-    const record: T = defaultFormatter(row);
-    return record;
+  format(row: Row) : T {
+    return mapKeys(row, (value, key) => camelCase(key));
   }
 
-  formatRows(rows: Array<Object>) : Array<T> {
+  formatRows(rows: Array<Row>) : Array<T> {
     return rows.map(this.format);
   }
 
-  one(sql: string, bindings: Array<any>, options: ?QueryOptions) : Promise<T> {
+  one(sql: string, bindings: Bindings, options: ?QueryOptions) : Promise<T> {
     const db = options && options.tx || this.db;
-    return db.oneOrNone(sql, bindings).then(this.format);
+    return db.one(sql, bindings).then(this.format);
   }
 
-  many(sql: string, bindings: Array<any>, options: ?QueryOptions) : Promise<Array<T>> {
+  many(sql: string, bindings: Bindings, options: ?QueryOptions) : Promise<Array<T>> {
     const db = options && options.tx || this.db;
-    return db.manyOrNone(sql, bindings).then(this.formatRows);
+    return db.many(sql, bindings).then(this.formatRows);
   }
 }
