@@ -20,11 +20,13 @@ import type {
 } from './types';
 
 import Inserts from './inserts';
+import setupParsers from './parsers';
 
 export default class Elephant<T> {
   db: PG;
 
   static Inserts = Inserts;
+  static setupTypeParsers = setupParsers;
 
   constructor(db: PG) {
     this.db = db;
