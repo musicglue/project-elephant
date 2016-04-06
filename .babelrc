@@ -1,4 +1,4 @@
 {
-  "presets": ["@somehats/babel-preset-node5"],
+  "presets": ["node5", "stage-1"],
   "plugins": ["transform-flow-comments", "syntax-flow"]
 }

@@ -5,7 +5,7 @@ import {
   mapKeys,
 } from 'lodash';
 
-import pgp, {
+import {
   txMode,
 } from 'pg-promise';
 
@@ -16,15 +16,15 @@ import type {
   TxOpts,
   Row,
   QueryOptions,
-  QueryFile,
+  SQL,
 } from './types';
+
+import Inserts from './inserts';
 
 export default class Elephant<T> {
   db: PG;
 
-  static queryFile(file: string): QueryFile {
-    return new pgp.QueryFile(file, { minify: true, debug: true });
-  }
+  static Inserts = Inserts;
 
   constructor(db: PG) {
     this.db = db;
@@ -33,6 +33,7 @@ export default class Elephant<T> {
   _transaction<R>(fn: TxFn<R>, options: TxOpts = {}) : Promise<R> {
     const mode = new txMode.TransactionMode({
       isolation: txMode.isolationLevel[options.isolation],
+      readOnly: options.readOnly,
     });
     const executor = tx => fn(tx);
     executor.mode = mode;
@@ -56,13 +57,23 @@ export default class Elephant<T> {
     return rows.map(this.format);
   }
 
-  one(sql: string, bindings: Bindings, options: ?QueryOptions) : Promise<T> {
+  none(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<void> {
+    const db = options && options.tx || this.db;
+    return db.none(sql, bindings);
+  }
+
+  one(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<T> {
     const db = options && options.tx || this.db;
     return db.one(sql, bindings).then(this.format);
   }
 
-  many(sql: string, bindings: Bindings, options: ?QueryOptions) : Promise<Array<T>> {
+  any(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<Array<T>> {
     const db = options && options.tx || this.db;
-    return db.many(sql, bindings).then(this.formatRows);
+    return db.any(sql, bindings).then(this.formatRows.bind(this));
+  }
+
+  many(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<Array<T>> {
+    const db = options && options.tx || this.db;
+    return db.many(sql, bindings).then(this.formatRows.bind(this));
   }
 }

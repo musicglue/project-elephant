@@ -4,8 +4,8 @@ export type Row = Object;
 export type Bindings = Object | Array<any>;
 
 export type QueryFile = {
-  error: Error;
-  file: String;
+  error: ?Error;
+  file: string;
   options: Object;
   query: string;
 };
@@ -24,7 +24,10 @@ export type PG = {
   tx: (executor: TxFn) => Promise;
 }
 
-export type TxOpts = { isolation?: string };
+export type TxOpts = {
+  isolation?: 'serializable' | 'read-only' | 'deferrable';
+  readOnly?: bool;
+};
 
 export type QueryOptions = {
   tx?: PG,
