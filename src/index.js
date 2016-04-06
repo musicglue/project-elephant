@@ -36,7 +36,7 @@ export default class Elephant<T> {
       readOnly: options.readOnly,
     });
     const executor = tx => fn(tx);
-    executor.mode = mode;
+    executor.txMode = mode;
     return this.db.tx(executor);
   }
 
