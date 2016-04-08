@@ -28,6 +28,20 @@ export default class Elephant<T> {
   static Inserts = Inserts;
   static setupTypeParsers = setupParsers;
 
+  static deepFormat(format, row, keysToFormat) {
+    return keysToFormat.reduce((formatted, key) => {
+      if (formatted[key] && typeof formatted[key] === 'object') {
+        return {
+          ...formatted,
+          [key]: Array.isArray(formatted[key])
+            ? formatted[key].map(entry => format(entry))
+            : format(formatted[key]),
+        };
+      }
+      return formatted;
+    }, format(row));
+  }
+
   constructor(db: PG) {
     this.db = db;
   }
@@ -67,6 +81,11 @@ export default class Elephant<T> {
   one(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<T> {
     const db = options && options.tx || this.db;
     return db.one(sql, bindings).then(this.format);
+  }
+
+  oneOrNone(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<?T> {
+    const db = options && options.tx || this.db;
+    return db.oneOrNone(sql, bindings).then(row => row && this.format(row));
   }
 
   any(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<Array<T>> {
