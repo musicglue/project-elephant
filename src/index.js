@@ -66,7 +66,7 @@ export default class Elephant<T> {
   }
 
   format(row: Row) : T {
-    return mapKeys(row, (value, key) => camelCase(key));
+    return mapKeys(row, (value, key) => (key[0] === '_' ? key : camelCase(key)));
   }
 
   formatRows(rows: Array<Row>) : Array<T> {
