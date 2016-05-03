@@ -1,6 +1,6 @@
 {
   "name": "@musicglue/elephant",
-  "version": "0.1.5",
+  "version": "1.0.0",
   "description": "A minimal model layer for pg-promises",
   "main": "lib/index.js",
   "scripts": {
@@ -19,7 +19,8 @@
   },
   "homepage": "https://github.com/musicglue/elephant#readme",
   "dependencies": {
-    "pg-promise": "^3.4.4"
+    "pg-promise": "^3.4.4",
+    "postgres-array": "^1.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.6.5",
