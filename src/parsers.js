@@ -11,7 +11,7 @@ const defaultParsers = {
   },
 };
 
-export default (db, types, extraParsers) => {
+export default (db, types, extraParsers = {}) => {
   const parsers = { ...defaultParsers, ...extraParsers };
 
   return Promise.all(Object.keys(parsers).map(name => {
