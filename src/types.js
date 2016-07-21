@@ -21,7 +21,7 @@ export type PG = {
   any: (query: SQL, values: Bindings) => Promise<Array<Row>>;
   oneOrNone: (query: SQL, values: Bindings) => Promise<?Row>;
   manyOrNone: (query: SQL, values: Bindings) => Promise<Array<Row>>;
-  tx: (executor: TxFn) => Promise;
+  tx: <R>(executor: TxFn<R>) => Promise<R>; // eslint-disable-line no-undef
 }
 
 export type TxOpts = {
