@@ -1,6 +1,6 @@
 {
   "name": "@musicglue/elephant",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "A minimal model layer for pg-promises",
   "main": "lib/index.js",
   "scripts": {
