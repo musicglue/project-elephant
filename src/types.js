@@ -32,3 +32,5 @@ export type TxOpts = {
 export type QueryOptions = {
   tx?: PG,
 };
+
+export type DBMap = { [dbName: string]: PG };
