@@ -23,7 +23,7 @@ import Inserts from './inserts';
 import setupParsers from './parsers';
 
 export default class Elephant<T> {
-  db: PG;
+  dbs: DBMap;
 
   static Inserts = Inserts;
   static setupTypeParsers = setupParsers;
@@ -42,25 +42,26 @@ export default class Elephant<T> {
     }, format(row));
   }
 
-  constructor(db: PG) {
-    this.db = db;
+  constructor(dbs: DBMap) {
+    this.dbs = dbs;
+    Object.assign(this, dbs);
   }
 
-  _transaction<R>(fn: TxFn<R>, options: TxOpts = {}) : Promise<R> {
+  _transaction<R>(db: PG, fn: TxFn<R>, options: TxOpts = {}) : Promise<R> {
     const mode = new txMode.TransactionMode({
       isolation: txMode.isolationLevel[options.isolation],
       readOnly: options.readOnly,
     });
     const executor = tx => fn(tx);
     executor.txMode = mode;
-    return this.db.tx(executor);
+    return db.tx(executor);
   }
 
-  transaction<R>(opts: TxFn<R> | TxOpts, fn?: TxFn<R>) : Promise<R> {
+  transaction<R>(db: PG, opts: TxFn<R> | TxOpts, fn?: TxFn<R>) : Promise<R> {
     if (typeof opts === 'function') {
-      return this._transaction(opts);
+      return this._transaction(db, opts);
     } else if (typeof opts === 'object' && typeof fn === 'function') {
-      return this._transaction(fn);
+      return this._transaction(db, fn, opts);
     }
     throw new TypeError('transaction must be passed an executor function');
   }
@@ -73,28 +74,28 @@ export default class Elephant<T> {
     return rows.map(this.format);
   }
 
-  none(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<void> {
-    const db = options && options.tx || this.db;
-    return db.none(sql, bindings);
+  none(db: PG, sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<void> {
+    const conn = options && options.tx || db;
+    return conn.none(sql, bindings);
   }
 
-  one(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<T> {
-    const db = options && options.tx || this.db;
-    return db.one(sql, bindings).then(this.format);
+  one(db: PG, sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<T> {
+    const conn = options && options.tx || db;
+    return conn.one(sql, bindings).then(this.format);
   }
 
-  oneOrNone(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<?T> {
-    const db = options && options.tx || this.db;
-    return db.oneOrNone(sql, bindings).then(row => row && this.format(row));
+  oneOrNone(db: PG, sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<?T> {
+    const conn = options && options.tx || db;
+    return conn.oneOrNone(sql, bindings).then(row => row && this.format(row));
   }
 
-  any(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<Array<T>> {
-    const db = options && options.tx || this.db;
-    return db.any(sql, bindings).then(this.formatRows.bind(this));
+  any(db: PG, sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<Array<T>> {
+    const conn = options && options.tx || db;
+    return conn.any(sql, bindings).then(this.formatRows.bind(this));
   }
 
-  many(sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<Array<T>> {
-    const db = options && options.tx || this.db;
-    return db.many(sql, bindings).then(this.formatRows.bind(this));
+  many(db: PG, sql: SQL, bindings: Bindings, options: ?QueryOptions) : Promise<Array<T>> {
+    const conn = options && options.tx || db;
+    return conn.many(sql, bindings).then(this.formatRows.bind(this));
   }
 }
