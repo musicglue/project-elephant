@@ -34,8 +34,9 @@ export default class Elephant<T> {
         return {
           ...formatted,
           [key]: Array.isArray(formatted[key])
-            ? formatted[key].map(entry => format(entry))
-            : format(formatted[key]),
+            ? formatted[key].map(entry =>
+                Elephant.deepFormat(format, format(entry), keysToFormat))
+            : Elephant.deepFormat(format, format(formatted[key]), keysToFormat),
         };
       }
       return formatted;
